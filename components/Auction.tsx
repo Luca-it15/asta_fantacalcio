@@ -34,14 +34,19 @@ export default function Auction({
 
     if (bids.length > 0) {
       const highest = bids.reduce((a, b) => (b.amount > a.amount ? b : a));
-      const history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
+
+      // 👉 Invia la cronologia alla Netlify Function
       const newEntry = {
         player: auction.player,
         winner: highest.user,
         price: highest.amount,
         timestamp: new Date().toISOString(),
       };
-      localStorage.setItem('auctionHistory', JSON.stringify([...history, newEntry]));
+
+      await fetch('/.netlify/functions/history', {
+        method: 'POST',
+        body: JSON.stringify(newEntry),
+      });
     }
   };
 
@@ -59,10 +64,16 @@ export default function Auction({
           value={bid}
           onChange={(e) => setBid(e.target.value)}
         />
-        <button className="bg-blue-500 text-white px-4 rounded" onClick={placeBid}>
+        <button
+          className="bg-blue-500 text-white px-4 rounded"
+          onClick={placeBid}
+        >
           Punta
         </button>
-        <button className="bg-red-500 text-white px-4 rounded" onClick={endAuction}>
+        <button
+          className="bg-red-500 text-white px-4 rounded"
+          onClick={endAuction}
+        >
           Fine Battitura
         </button>
       </div>
@@ -70,7 +81,11 @@ export default function Auction({
         {bids.map((b, i) => (
           <li
             key={i}
-            className={`px-3 py-1 rounded ${highest && b.amount === highest.amount ? "bg-yellow-200" : "bg-gray-100"}`}
+            className={`px-3 py-1 rounded ${
+              highest && b.amount === highest.amount
+                ? 'bg-yellow-200'
+                : 'bg-gray-100'
+            }`}
           >
             {b.user}: €{b.amount}
           </li>

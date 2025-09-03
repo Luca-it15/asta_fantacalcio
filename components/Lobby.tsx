@@ -1,5 +1,4 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import PlayerSearch from './PlayerSearch';
 import Auction from './Auction';
@@ -26,19 +25,19 @@ export default function Lobby({ username }: { username: string }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Polling per utenti connessi (via Netlify Function)
+  // Gestione utenti connessi
   useEffect(() => {
     if (!username) return;
 
     const interval = setInterval(async () => {
       try {
-        // aggiungo l'utente (POST)
+        // aggiungo/aggiorno utente
         await fetch('/.netlify/functions/users', {
           method: 'POST',
           body: JSON.stringify({ username }),
         });
 
-        // leggo la lista aggiornata (GET)
+        // leggo lista aggiornata
         const res = await fetch('/.netlify/functions/users');
         if (!res.ok) return;
         const data = await res.json();
@@ -48,7 +47,26 @@ export default function Lobby({ username }: { username: string }) {
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    // Quando l’utente chiude la pagina o cambia route
+    const handleBeforeUnload = async () => {
+      try {
+        await fetch('/.netlify/functions/users', {
+          method: 'DELETE',
+          body: JSON.stringify({ username }),
+        });
+      } catch (err) {
+        console.error('Errore delete user:', err);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Rimuovi utente anche quando il componente si smonta
+      handleBeforeUnload();
+    };
   }, [username]);
 
   return (
