@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[functions]
+  # Qui indichi la cartella dove si trovano le funzioni serverless
+  directory = "netlify/functions"
+
+# Reindirizzamenti (utile per Next.js routing lato client)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
