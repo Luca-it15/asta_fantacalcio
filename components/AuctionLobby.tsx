@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import PlayerSearch from './PlayerSearch';
 import Auction from './Auction';
 
-export default function Lobby({ username }: { username: string }) {
+export default function AuctionLobby({ username }: { username: string }) {
   const [auction, setAuction] = useState<any>(null);
   const [bids, setBids] = useState<any[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
