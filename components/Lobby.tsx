@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import PlayerSearch from './PlayerSearch';
 import Auction from './Auction';
 
@@ -7,6 +8,7 @@ export default function Lobby({ username }: { username: string }) {
   const [auction, setAuction] = useState<any>(null);
   const [bids, setBids] = useState<any[]>([]);
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
+  const router = useRouter();
 
   // Polling per asta e puntate
   useEffect(() => {
@@ -69,11 +71,26 @@ export default function Lobby({ username }: { username: string }) {
     };
   }, [username]);
 
+  // Funzione logout
+  const handleLogout = async () => {
+    try {
+      await fetch('/.netlify/functions/users', {
+        method: 'DELETE',
+        body: JSON.stringify({ username }),
+      });
+    } catch (err) {
+      console.error('Errore logout:', err);
+    }
+
+    localStorage.removeItem('username');
+    router.push('/'); // porta l’utente alla home
+  };
+
   return (
     <div className="p-8 flex gap-8">
       {/* Colonna laterale sinistra */}
-      <div className="w-1/4">
-        <a href="/history" className="block text-blue-600 underline mb-4">
+      <div className="w-1/4 space-y-4">
+        <a href="/history" className="block text-blue-600 underline">
           Vai alla Cronologia
         </a>
 
@@ -95,6 +112,14 @@ export default function Lobby({ username }: { username: string }) {
             </ul>
           )}
         </div>
+
+        {/* 🔴 Pulsante di logout */}
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Logout
+        </button>
       </div>
 
       {/* Colonna principale */}
